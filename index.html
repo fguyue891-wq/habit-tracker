@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>涔犳儻鎵撳崱</title>
+<title>习惯打卡</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -149,29 +149,29 @@ body {
       </svg>
       <div class="progress-text">
         <span class="count" id="progressCount">0/0</span>
-        <span class="label">宸插畬鎴?/span>
+        <span class="label">已完成</span>
       </div>
     </div>
   </header>
 
   <div class="card" id="habitCard">
-    <div class="card-header">浠婃棩涔犳儻</div>
+    <div class="card-header">今日习惯</div>
     <div id="habitList"></div>
     <div class="empty-state" id="emptyState">
-      <div class="icon">馃尡</div>
-      <div class="text">杩樻病鏈変範鎯?br>娣诲姞涓€涓紑濮嬫墦鍗″惂</div>
+      <div class="icon">🌱</div>
+      <div class="text">还没有习惯<br>添加一个开始打卡吧</div>
     </div>
   </div>
 
   <div class="add-section">
     <form class="add-form" id="addForm" autocomplete="off">
-      <input class="add-input" id="addInput" type="text" placeholder="娣诲姞鏂颁範鎯€? maxlength="30">
-      <button class="add-btn" type="submit">娣诲姞</button>
+      <input class="add-input" id="addInput" type="text" placeholder="添加新习惯…" maxlength="30">
+      <button class="add-btn" type="submit">添加</button>
     </form>
   </div>
 
   <div class="history-section">
-    <div class="history-title">鏈€杩?7 澶?/div>
+    <div class="history-title">最近 7 天</div>
     <div class="history-card" id="historyCard"></div>
   </div>
 </div>
@@ -192,11 +192,11 @@ body {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
 
-  var WDAY = ['鏃?,'涓€','浜?,'涓?,'鍥?,'浜?,'鍏?];
+  var WDAY = ['日','一','二','三','四','五','六'];
   function fmtDate(s) {
     var p = s.split('-');
     var d = new Date(+p[0], +p[1] - 1, +p[2]);
-    return (d.getMonth() + 1) + '鏈? + d.getDate() + '鏃?鍛? + WDAY[d.getDay()];
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日 周' + WDAY[d.getDay()];
   }
 
   function load() {
@@ -269,7 +269,7 @@ body {
       row.innerHTML =
         '<div class="habit-check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>' +
         '<span class="habit-name">' + esc(h.name) + '</span>' +
-        '<button class="habit-delete" title="鍒犻櫎"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+        '<button class="habit-delete" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
 
       row.addEventListener('click', function(e) {
         if (e.target.closest('.habit-delete')) return;
@@ -321,7 +321,7 @@ body {
         if (data.habits.some(function(h) { return h.id === hid; })) return;
         var dot = document.createElement('span');
         dot.className = 'history-dot deleted';
-        dot.title = '宸插垹闄ょ殑涔犳儻';
+        dot.title = '已删除的习惯';
         dots.appendChild(dot);
       });
 
