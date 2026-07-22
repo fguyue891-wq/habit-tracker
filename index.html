@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b8c6f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/habit-tracker/manifest.json">
+<link rel="apple-touch-icon" href="/habit-tracker/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/habit-tracker/icons/icon-192.png">
 <title>习惯打卡</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -387,5 +393,12 @@ body {
   renderAll();
 })();
 </script>
-</body>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/habit-tracker/sw.js')
+    .then(function() { console.log('SW registered'); })
+    .catch(function(e) { console.log('SW failed:', e); });
+}
+</script></body>
 </html>
