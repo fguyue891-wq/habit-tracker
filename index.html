@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>涔犳儻鎵撳崱</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f4f2ee;
+  color: #2c2c2c;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px 80px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container { width: 100%; max-width: 440px; }
+
+/* Header */
+.header { text-align: center; padding: 32px 0 24px; }
+.header .date { font-size: 14px; color: #999; margin-bottom: 12px; letter-spacing: 0.5px; }
+
+/* Progress ring */
+.progress-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto 8px; }
+.progress-ring { transform: rotate(-90deg); }
+.progress-ring .bg { fill: none; stroke: #e8e5df; stroke-width: 8; }
+.progress-ring .fill {
+  fill: none; stroke: #5b8c6f; stroke-width: 8;
+  stroke-linecap: round; transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+.progress-ring .fill.done { stroke: #4a9c5d; }
+.progress-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.progress-text .count { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: #2c2c2c; }
+.progress-text .label { font-size: 12px; color: #999; margin-top: 2px; }
+
+/* Cards */
+.card {
+  background: #fff; border-radius: 16px; padding: 8px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+}
+.card-header {
+  padding: 12px 20px 8px; font-size: 13px; font-weight: 600;
+  color: #aaa; text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* Habit item */
+.habit-item {
+  display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+  transition: background 0.15s; border-bottom: 1px solid #f5f4f1;
+}
+.habit-item:last-child { border-bottom: none; }
+.habit-item:hover { background: #faf9f7; }
+.habit-item:active { background: #f5f3ef; }
+
+.habit-check {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid #d5d1ca;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-right: 14px; transition: all 0.2s ease;
+}
+.habit-item.checked .habit-check { background: #5b8c6f; border-color: #5b8c6f; }
+.habit-check svg { width: 14px; height: 14px; opacity: 0; transform: scale(0.5); transition: all 0.2s ease; }
+.habit-item.checked .habit-check svg { opacity: 1; transform: scale(1); }
+.habit-check svg polyline { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.habit-name { flex: 1; font-size: 16px; transition: color 0.2s, text-decoration 0.2s; }
+.habit-item.checked .habit-name { color: #b0aca5; text-decoration: line-through; text-decoration-color: #d5d1ca; }
+
+.habit-delete {
+  width: 30px; height: 30px; border: none; background: none; cursor: pointer;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: #ccc; transition: all 0.15s; flex-shrink: 0; margin-left: 8px;
+}
+.habit-delete:hover { color: #e07060; background: #fef4f2; }
+.habit-delete svg { width: 16px; height: 16px; }
+
+/* Empty */
+.empty-state { text-align: center; padding: 40px 20px; color: #c5c0b8; }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+.empty-state .text { font-size: 14px; line-height: 1.6; }
+
+/* Add habit */
+.add-section {
+  margin-top: 12px; background: #fff; border-radius: 16px; padding: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+}
+.add-form { display: flex; gap: 8px; }
+.add-input {
+  flex: 1; border: none; outline: none; font-size: 15px;
+  padding: 12px 12px; background: transparent; color: #2c2c2c; font-family: inherit;
+}
+.add-input::placeholder { color: #c5c0b8; }
+.add-btn {
+  padding: 10px 20px; border: none; background: #5b8c6f; color: #fff;
+  font-size: 14px; font-weight: 600; border-radius: 12px; cursor: pointer;
+  font-family: inherit; transition: background 0.15s; white-space: nowrap;
+}
+.add-btn:hover { background: #4a7a5d; }
+.add-btn:active { background: #3e6b4f; }
+
+/* History */
+.history-section { margin-top: 32px; }
+.history-title {
+  font-size: 13px; font-weight: 600; color: #aaa;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 4px;
+}
+.history-card {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+}
+.history-row {
+  display: flex; align-items: center; padding: 12px 20px;
+  border-bottom: 1px solid #f5f4f1; gap: 10px;
+}
+.history-row:last-child { border-bottom: none; }
+.history-row.today { background: #fafdf8; }
+.history-date { font-size: 13px; color: #888; min-width: 100px; flex-shrink: 0; }
+.history-row.today .history-date { color: #5b8c6f; font-weight: 600; }
+.history-dots { display: flex; gap: 5px; flex: 1; flex-wrap: wrap; }
+.history-dot { width: 10px; height: 10px; border-radius: 50%; background: #e8e5df; flex-shrink: 0; }
+.history-dot.done { background: #5b8c6f; }
+.history-dot.deleted { background: #f0ece6; border: 1px dashed #d5d1ca; }
+.history-count {
+  font-size: 13px; color: #888; min-width: 36px; text-align: right; flex-shrink: 0;
+}
+.history-row.today .history-count { color: #5b8c6f; font-weight: 600; }
+
+@keyframes pulse {
+  0%, 100% { transform: rotate(-90deg) scale(1); }
+  50% { transform: rotate(-90deg) scale(1.04); }
+}
+.progress-ring.done-pulse { animation: pulse 0.6s ease-in-out; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <div class="date" id="dateDisplay"></div>
+    <div class="progress-wrap">
+      <svg class="progress-ring" id="progressRing" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="bg" cx="60" cy="60" r="52"/>
+        <circle class="fill" id="progressFill" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="progress-text">
+        <span class="count" id="progressCount">0/0</span>
+        <span class="label">宸插畬鎴?/span>
+      </div>
+    </div>
+  </header>
+
+  <div class="card" id="habitCard">
+    <div class="card-header">浠婃棩涔犳儻</div>
+    <div id="habitList"></div>
+    <div class="empty-state" id="emptyState">
+      <div class="icon">馃尡</div>
+      <div class="text">杩樻病鏈変範鎯?br>娣诲姞涓€涓紑濮嬫墦鍗″惂</div>
+    </div>
+  </div>
+
+  <div class="add-section">
+    <form class="add-form" id="addForm" autocomplete="off">
+      <input class="add-input" id="addInput" type="text" placeholder="娣诲姞鏂颁範鎯€? maxlength="30">
+      <button class="add-btn" type="submit">娣诲姞</button>
+    </form>
+  </div>
+
+  <div class="history-section">
+    <div class="history-title">鏈€杩?7 澶?/div>
+    <div class="history-card" id="historyCard"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var STORAGE_KEY = 'habit_tracker_v2';
+
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function dateStr(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  var WDAY = ['鏃?,'涓€','浜?,'涓?,'鍥?,'浜?,'鍏?];
+  function fmtDate(s) {
+    var p = s.split('-');
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return (d.getMonth() + 1) + '鏈? + d.getDate() + '鏃?鍛? + WDAY[d.getDay()];
+  }
+
+  function load() {
+    try {
+      var r = localStorage.getItem(STORAGE_KEY);
+      if (r) return JSON.parse(r);
+    } catch(e) {}
+    return { habits: [], completions: {} };
+  }
+  function save(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+  var data = load();
+
+  var elDate = document.getElementById('dateDisplay');
+  var elRing = document.getElementById('progressRing');
+  var elFill = document.getElementById('progressFill');
+  var elCount = document.getElementById('progressCount');
+  var elList = document.getElementById('habitList');
+  var elEmpty = document.getElementById('emptyState');
+  var elForm = document.getElementById('addForm');
+  var elInput = document.getElementById('addInput');
+  var elHist = document.getElementById('historyCard');
+
+  var CIRC = 2 * Math.PI * 52;
+
+  function renderAll() {
+    renderHeader();
+    renderHabits();
+    updateProgress();
+    renderHistory();
+  }
+
+  function renderHeader() {
+    elDate.textContent = fmtDate(todayStr());
+  }
+
+  function updateProgress() {
+    var today = todayStr();
+    var done = (data.completions[today] || []).length;
+    var total = data.habits.length;
+    var ratio = total === 0 ? 0 : done / total;
+
+    elCount.textContent = done + '/' + total;
+    var off = CIRC * (1 - ratio);
+    elFill.setAttribute('stroke-dasharray', CIRC);
+    elFill.setAttribute('stroke-dashoffset', off);
+
+    if (total > 0 && done === total) {
+      elFill.classList.add('done');
+      elRing.classList.add('done-pulse');
+      setTimeout(function() { elRing.classList.remove('done-pulse'); }, 600);
+    } else {
+      elFill.classList.remove('done');
+    }
+  }
+
+  function renderHabits() {
+    elList.innerHTML = '';
+    if (data.habits.length === 0) { elEmpty.style.display = 'block'; return; }
+    elEmpty.style.display = 'none';
+
+    var today = todayStr();
+    var doneSet = new Set(data.completions[today] || []);
+
+    data.habits.forEach(function(h) {
+      var ok = doneSet.has(h.id);
+      var row = document.createElement('div');
+      row.className = 'habit-item' + (ok ? ' checked' : '');
+      row.dataset.id = h.id;
+      row.innerHTML =
+        '<div class="habit-check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>' +
+        '<span class="habit-name">' + esc(h.name) + '</span>' +
+        '<button class="habit-delete" title="鍒犻櫎"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+
+      row.addEventListener('click', function(e) {
+        if (e.target.closest('.habit-delete')) return;
+        toggle(h.id);
+      });
+      row.querySelector('.habit-delete').addEventListener('click', function(e) {
+        e.stopPropagation();
+        del(h.id);
+      });
+      elList.appendChild(row);
+    });
+  }
+
+  function renderHistory() {
+    elHist.innerHTML = '';
+    var days = [];
+    var today = todayStr();
+    var now = new Date();
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(now);
+      d.setDate(d.getDate() - i);
+      days.push(dateStr(d));
+    }
+
+    days.forEach(function(day) {
+      var isToday = day === today;
+      var comps = data.completions[day] || [];
+      var doneSet = new Set(comps);
+
+      var row = document.createElement('div');
+      row.className = 'history-row' + (isToday ? ' today' : '');
+
+      var ds = document.createElement('span');
+      ds.className = 'history-date';
+      ds.textContent = fmtDate(day);
+      row.appendChild(ds);
+
+      var dots = document.createElement('div');
+      dots.className = 'history-dots';
+
+      data.habits.forEach(function(h) {
+        var dot = document.createElement('span');
+        dot.className = 'history-dot' + (doneSet.has(h.id) ? ' done' : '');
+        dot.title = h.name;
+        dots.appendChild(dot);
+      });
+
+      comps.forEach(function(hid) {
+        if (data.habits.some(function(h) { return h.id === hid; })) return;
+        var dot = document.createElement('span');
+        dot.className = 'history-dot deleted';
+        dot.title = '宸插垹闄ょ殑涔犳儻';
+        dots.appendChild(dot);
+      });
+
+      if (dots.children.length === 0) {
+        var ph = document.createElement('span');
+        ph.className = 'history-dot';
+        ph.style.opacity = '0.4';
+        dots.appendChild(ph);
+      }
+
+      row.appendChild(dots);
+
+      var cs = document.createElement('span');
+      cs.className = 'history-count';
+      cs.textContent = comps.length + '/' + data.habits.length;
+      row.appendChild(cs);
+
+      elHist.appendChild(row);
+    });
+  }
+
+  function esc(s) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(s));
+    return div.innerHTML;
+  }
+
+  function toggle(id) {
+    var today = todayStr();
+    if (!data.completions[today]) data.completions[today] = [];
+    var arr = data.completions[today];
+    var idx = arr.indexOf(id);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(id);
+    save(data);
+    renderHabits();
+    updateProgress();
+    renderHistory();
+  }
+
+  function del(id) {
+    data.habits = data.habits.filter(function(h) { return h.id !== id; });
+    save(data);
+    renderAll();
+  }
+
+  function add(name) {
+    var t = name.trim();
+    if (!t) return;
+    if (t.length > 30) t = t.slice(0, 30);
+    data.habits.push({ id: uid(), name: t, createdAt: todayStr() });
+    save(data);
+    renderAll();
+    elInput.value = '';
+    elInput.focus();
+  }
+
+  elForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    add(elInput.value);
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
