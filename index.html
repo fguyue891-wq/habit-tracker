@@ -378,6 +378,9 @@ var elDate = document.getElementById('dateDisplay');
 
   function del(id) {
     data.habits = data.habits.filter(function(h) { return h.id !== id; });
+    Object.keys(data.completions).forEach(function(day) {
+      data.completions[day] = data.completions[day].filter(function(hid) { return hid !== id; });
+    });
     save(data);
     renderAll();
   }
