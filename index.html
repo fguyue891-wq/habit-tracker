@@ -233,8 +233,18 @@ var elDate = document.getElementById('dateDisplay');
   var elHist = document.getElementById('historyCard');
 
   var CIRC = 2 * Math.PI * 52;
+  function cleanup() {
+    var ids = new Set(data.habits.map(function(h) { return h.id; }));
+    var changed = false;
+    Object.keys(data.completions).forEach(function(day) {
+      var before = data.completions[day].length;
+      data.completions[day] = data.completions[day].filter(function(hid) { return ids.has(hid); });
+      if (data.completions[day].length !== before) changed = true;
+    });
+    if (changed) save(data);
+  }
 
-  function renderAll() {
+  function renderAll() { cleanup();
     renderHeader();
     renderHabits();
     updateProgress();
@@ -245,7 +255,7 @@ var elDate = document.getElementById('dateDisplay');
     elDate.textContent = fmtDate(todayStr());
   }
 
-  function updateProgress() {
+  function updateProgress() { cleanup();
     var today = todayStr();
     var done = (data.completions[today] || []).length;
     var total = data.habits.length;
