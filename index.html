@@ -212,11 +212,17 @@ body {
     } catch(e) {}
     return { habits: [], completions: {} };
   }
-  function save(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+  function save(d) {
+    try {
+      if (!d || !Array.isArray(d.habits)) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    } catch(e) {}
+  }
 
   var data = load();
+  var activeIds = new Set(data.habits.map(function(h) { return h.id; })); Object.keys(data.completions).forEach(function(day) { data.completions[day] = data.completions[day].filter(function(id) { return activeIds.has(id); }); });
 
-  var elDate = document.getElementById('dateDisplay');
+var elDate = document.getElementById('dateDisplay');
   var elRing = document.getElementById('progressRing');
   var elFill = document.getElementById('progressFill');
   var elCount = document.getElementById('progressCount');
@@ -356,6 +362,8 @@ body {
   }
 
   function toggle(id) {
+    var exists = data.habits.some(function(h) { return h.id === id; });
+    if (!exists) { renderAll(); return; }
     var today = todayStr();
     if (!data.completions[today]) data.completions[today] = [];
     var arr = data.completions[today];
