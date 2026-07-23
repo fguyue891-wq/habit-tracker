@@ -1,4 +1,4 @@
-var CACHE = 'habit-tracker-v1';
+var CACHE = 'habit-tracker-v2';
 var ASSETS = [
   '/habit-tracker/',
   '/habit-tracker/index.html',
